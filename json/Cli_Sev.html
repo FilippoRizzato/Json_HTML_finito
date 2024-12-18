@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"> <!-- Link al foglio di stile principale -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> <!-- Link a Bootstrap per la stilizzazione -->
+    <title>Architettura Client-Server</title> <!-- Titolo della pagina -->
+</head>
+<body>
+
+<!-- Header dinamico da JSON -->
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h1 id="page-header"></h1> <!-- Intestazione della pagina -->
+    </div>
+</div>
+
+<!-- Navbar dinamica da JSON -->
+<nav class="navbar navbar-expand-sm custom-navbar">
+    <div class="container-fluid">
+        <ul class="navbar-nav mx-auto" id="navbar-items"> <!-- Lista di navigazione -->
+            <!-- I link di navigazione verranno popolati da JSON -->
+        </ul>
+    </div>
+</nav>
+
+<!-- Corpo principale con i contenuti -->
+<div class="container mt-4">
+
+    <!-- Sezione: Cos'è l'Architettura Client-Server -->
+    <div class="row mb-3" id="section-1">
+        <div class="col-12">
+            <h2 id="section-1-heading"></h2> <!-- Intestazione della sezione -->
+            <p id="section-1-paragraph-1"></p> <!-- Primo paragrafo -->
+            <p id="section-1-paragraph-2"></p> <!-- Secondo paragrafo -->
+        </div>
+    </div>
+
+    <!-- Sezione: Come le Socket si Collegano all'Architettura Client-Server -->
+    <div class="row mb-3" id="section-2">
+        <div class="col-12">
+            <h3 id="section-2-heading"></h3> <!-- Intestazione della sezione -->
+            <p id="section-2-paragraph-1"></p> <!-- Primo paragrafo -->
+            <p id="section-2-paragraph-2"></p> <!-- Secondo paragrafo -->
+        </div>
+    </div>
+
+    <!-- Sezione: Esempio di Connessione Client-Server con le Socket -->
+    <div class="row mb-3" id="section-3">
+        <div class="col-12">
+            <h4 id="section-3-heading"></h4> <!-- Intestazione della sezione -->
+            <p id="section-3-paragraph"></p> <!-- Paragrafo con l'esempio -->
+        </div>
+    </div>
+
+    <!-- Sezione: Diagramma di un'Architettura Client-Server -->
+    <div class="row mb-3" id="section-4">
+        <div class="col-12">
+            <div class="text-center mt-4">
+                <h5 id="section-4-heading"></h5> <!-- Intestazione della sezione -->
+                <img id="section-4-image" alt="Diagramma Client-Server" class="img-fluid"> <!-- Immagine del diagramma -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer dinamico da JSON -->
+<footer class="bg-dark text-white text-center py-4 mt-5">
+    <p id="footer-content"></p> <!-- Contenuto del footer -->
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-cVKIPhG81rKrOSn0" crossorigin="anonymous"></script>
+
+<script>
+    // Carica il file JSON e inserisci i contenuti nella pagina
+    fetch('CS.json')
+        .then(response => response.json()) // Converte la risposta in formato JSON
+        .then(jsonData => {
+            // Popolare il contenuto dell'header
+            document.getElementById("page-header").textContent = jsonData.body.header.h1;
+
+            // Popolare la barra di navigazione
+            const navbarItems = jsonData.body.navigation.items;
+            const navbarContainer = document.getElementById("navbar-items");
+            navbarItems.forEach(item => {
+                const li = document.createElement("li");
+                li.classList.add("nav-item"); // Aggiunge la classe nav-item alla lista
+                const a = document.createElement("a");
+                a.classList.add("nav-link"); // Aggiunge la classe nav-link al link
+                a.href = item.href; // Imposta l'attributo href del link
+                a.textContent = item.text; // Imposta il testo del link
+                li.appendChild(a); // Aggiunge il link alla lista
+                navbarContainer.appendChild(li); // Aggiunge l'elemento della lista alla navbar
+            });
+
+            // Popolare la prima sezione
+            const section1 = jsonData.body.content.sections[0];
+            document.getElementById("section-1-heading").textContent = section1.heading; // Imposta l'intestazione della sezione
+            document.getElementById("section-1-paragraph-1").textContent = section1.paragraphs[0]; // Imposta il primo paragrafo
+            document.getElementById("section-1-paragraph-2").textContent = section1.paragraphs[1]; // Imposta il secondo paragrafo
+
+            // Popolare la seconda sezione
+            const section2 = jsonData.body.content.sections[1];
+            document.getElementById("section-2-heading").textContent = section2.heading; // Imposta l'intestazione della sezione
+            document.getElementById("section-2-paragraph-1").textContent = section2.paragraphs[0]; // Imposta il primo paragrafo
+            document.getElementById("section-2-paragraph-2").textContent = section2.paragraphs[1]; // Imposta il secondo paragrafo
+
+            // Popolare la terza sezione
+            const section3 = jsonData.body.content.sections[2];
+            document.getElementById("section-3-heading").textContent = section3.heading; // Imposta l'intestazione della sezione
+            document.getElementById("section-3-paragraph").textContent = section3.paragraphs[0]; // Imposta il paragrafo
+
+            // Popolare la quarta sezione (immagine)
+            const section4 = jsonData.body.content.sections[3];
+            document.getElementById("section-4-heading").textContent = section4.heading; // Imposta l'intestazione della sezione
+
+            const imgElement = document.getElementById("section-4-image");
+            imgElement.src = section4.image.src; // Imposta la sorgente dell'immagine
+            imgElement.alt = section4.image.alt; // Imposta il testo alternativo dell'immagine
+
+            // Verifica se l'immagine è stata caricata correttamente
+            imgElement.onerror = function() {
+                imgElement.src = 'path/to/fallback-image.jpg'; // Fallback image in caso di errore
+                imgElement.alt = 'Immagine non disponibile'; // Testo alternativo in caso di errore
+            };
+
+            // Popolare il footer
+            const footerContent = jsonData.body.footer.content.join(' | '); // Unisce i contenuti del footer
+            document.getElementById("footer-content").textContent = footerContent; // Imposta il contenuto del footer
+        })
+        .catch(error => {
+            console.error('Errore nel caricamento del JSON:', error); // Gestione degli errori nel caricamento del JSON
+        });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en"> <!-- Dichiarazione del documento HTML5 con lingua impostata su inglese. -->
+<head>
+    <meta charset="UTF-8"> <!-- Imposta la codifica dei caratteri come UTF-8, per supportare i caratteri speciali. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Rende il layout responsivo sui dispositivi mobili. -->
+    <link rel="stylesheet" href="style.css"> <!-- Collega il file CSS per la personalizzazione dello stile. -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> <!-- Collega Bootstrap per utilizzare i componenti UI predefiniti. -->
+    <title>Introduzione alle Socket</title> <!-- Titolo che appare nella scheda del browser. -->
+</head>
+<body>
+
+<!-- Contenitori per le varie sezioni della pagina -->
+<div id="header-container"></div> <!-- Sezione per l'intestazione, che verrà generata dinamicamente. -->
+<nav id="navbar-container"></nav> <!-- Sezione per la navigazione, che verrà generata dinamicamente. -->
+<div id="slideshow-container"></div> <!-- Sezione per lo slideshow, che verrà generata dinamicamente. -->
+<div id="content-container"></div> <!-- Sezione per il contenuto principale, che verrà generata dinamicamente. -->
+<footer id="footer-container"></footer> <!-- Sezione per il piè di pagina, che verrà generata dinamicamente. -->
+
+<script>
+    // Recupera il contenuto da un file JSON esterno (HP.json) per costruire la pagina.
+    fetch('HP.json')
+        .then(response => response.json()) // Parsea il file JSON.
+        .then(data => {
+            // Popola le varie sezioni con i dati del file JSON.
+            renderHeader(data.html.body.header);
+            renderNavbar(data.html.body.nav);
+            renderSlideshow(data.html.body.slideshow);
+            renderContent(data.html.body.content);
+            renderFooter(data.html.body.footer);
+        })
+        .catch(error => console.error('Error loading JSON:', error)); // Gestisce eventuali errori nel caricamento del JSON.
+
+    // Funzione per rendere dinamicamente l'intestazione (header).
+    function renderHeader(headerData) {
+        const headerContainer = document.getElementById('header-container'); // Ottieni il contenitore dell'intestazione.
+        const headerDiv = document.createElement('div'); // Crea un div per l'intestazione.
+        headerDiv.className = headerData.class; // Applica la classe CSS per l'intestazione.
+
+        // Aggiunge gli elementi all'intestazione in base al tipo (immagine o testo).
+        headerData.content.forEach(item => {
+            if (item.type === "img") { // Se è un'immagine
+                const imgElement = document.createElement('img');
+                imgElement.src = item.src; // Imposta la sorgente dell'immagine.
+                imgElement.alt = item.alt; // Imposta l'attributo alt.
+                imgElement.className = item.class; // Applica la classe CSS.
+                imgElement.height = item.height; // Imposta l'altezza dell'immagine.
+                imgElement.width = item.width; // Imposta la larghezza dell'immagine.
+                headerDiv.appendChild(imgElement); // Aggiunge l'immagine al div.
+            } else if (item.type === "h1") { // Se è un'intestazione h1
+                const h1Element = document.createElement('h1');
+                h1Element.textContent = item.text; // Imposta il testo dell'intestazione.
+                headerDiv.appendChild(h1Element); // Aggiunge l'intestazione al div.
+            }
+        });
+
+        headerContainer.appendChild(headerDiv); // Aggiunge il div all'intestazione.
+    }
+
+    // Funzione per rendere dinamicamente la barra di navigazione (navbar).
+    function renderNavbar(navData) {
+        const navbarContainer = document.getElementById('navbar-container'); // Ottieni il contenitore della barra di navigazione.
+        const navElement = document.createElement('nav'); // Crea un elemento nav.
+        navElement.className = navData.class; // Applica la classe CSS per la barra di navigazione.
+
+        const ulElement = document.createElement('ul'); // Crea un elemento ul per i link di navigazione.
+        ulElement.className = navData.content.ul.class; // Applica la classe CSS per l'elenco.
+
+        // Aggiunge gli elementi li (link) alla barra di navigazione.
+        navData.content.ul.li.forEach(item => {
+            const liElement = document.createElement('li');
+            liElement.className = item.class; // Imposta la classe dell'elemento li.
+            const aElement = document.createElement('a');
+            aElement.className = item.a.class; // Imposta la classe dell'elemento a.
+            aElement.href = item.a.href; // Imposta l'URL del link.
+            aElement.textContent = item.a.text; // Imposta il testo del link.
+            liElement.appendChild(aElement); // Aggiunge il link all'elemento li.
+            ulElement.appendChild(liElement); // Aggiunge l'elemento li all'elenco.
+        });
+
+        navElement.appendChild(ulElement); // Aggiunge l'elenco alla barra di navigazione.
+        navbarContainer.appendChild(navElement); // Aggiunge la barra di navigazione al contenitore.
+    }
+
+    // Funzione per rendere dinamicamente lo slideshow.
+    function renderSlideshow(slideshowData) {
+        const slideshowContainer = document.getElementById('slideshow-container'); // Ottieni il contenitore dello slideshow.
+        const slideshowDiv = document.createElement('div'); // Crea un div per lo slideshow.
+        slideshowDiv.className = slideshowData.container_class; // Applica la classe CSS per il contenitore dello slideshow.
+
+        // Crea l'immagine dello slideshow.
+        const imgElement = document.createElement('img');
+        imgElement.id = slideshowData.content.img.id; // Imposta l'ID dell'immagine.
+        imgElement.src = slideshowData.content.img.src; // Imposta la sorgente dell'immagine.
+        imgElement.className = slideshowData.content.img.class; // Applica la classe CSS.
+        imgElement.alt = slideshowData.content.img.alt; // Imposta l'attributo alt.
+        slideshowDiv.appendChild(imgElement); // Aggiunge l'immagine al div dello slideshow.
+
+        // Crea i pulsanti per navigare nello slideshow.
+        const buttonDiv = document.createElement('div');
+        buttonDiv.className = 'mt-2'; // Applica margine superiore.
+        slideshowData.content.buttons.forEach(button => {
+            const buttonElement = document.createElement('button');
+            buttonElement.className = button.class; // Imposta la classe del pulsante.
+            buttonElement.onclick = new Function(button.onclick); // Imposta la funzione da eseguire al click.
+            buttonElement.textContent = button.text; // Imposta il testo del pulsante.
+            buttonDiv.appendChild(buttonElement); // Aggiunge il pulsante al div.
+        });
+
+        slideshowDiv.appendChild(buttonDiv); // Aggiunge il div dei pulsanti al div dello slideshow.
+        slideshowContainer.appendChild(slideshowDiv); // Aggiunge lo slideshow al contenitore.
+    }
+
+    // Funzione per rendere dinamicamente il contenuto principale.
+    function renderContent(contentData) {
+        const contentContainer = document.getElementById('content-container'); // Ottieni il contenitore del contenuto.
+        const sectionDiv = document.createElement('div'); // Crea un div per la sezione del contenuto.
+        sectionDiv.className = contentData.section.class; // Applica la classe CSS per la sezione.
+
+        // Aggiunge le colonne di contenuto (testo, immagini) alla sezione.
+        contentData.section.columns.forEach(column => {
+            const columnDiv = document.createElement('div');
+            columnDiv.className = column.class; // Imposta la classe CSS per la colonna.
+            column.content.forEach(item => {
+                if (item.type === "p") { // Se è un paragrafo
+                    const pElement = document.createElement('p');
+                    pElement.textContent = item.text; // Imposta il testo del paragrafo.
+                    columnDiv.appendChild(pElement); // Aggiunge il paragrafo alla colonna.
+                } else if (item.type === "img") { // Se è un'immagine
+                    const imgElement = document.createElement('img');
+                    imgElement.src = item.src; // Imposta la sorgente dell'immagine.
+                    imgElement.alt = item.alt; // Imposta l'attributo alt.
+                    imgElement.className = item.class; // Applica la classe CSS.
+                    columnDiv.appendChild(imgElement); // Aggiunge l'immagine alla colonna.
+                }
+            });
+            sectionDiv.appendChild(columnDiv); // Aggiunge la colonna alla sezione.
+        });
+
+        contentContainer.appendChild(sectionDiv); // Aggiunge la sezione di contenuto al contenitore.
+    }
+
+    // Funzione per rendere dinamicamente il piè di pagina.
+    function renderFooter(footerData) {
+        const footerContainer = document.getElementById('footer-container'); // Ottieni il contenitore del piè di pagina.
+        const footerDiv = document.createElement('footer'); // Crea un elemento footer.
+        footerDiv.className = footerData.class; // Applica la classe CSS per il piè di pagina.
+
+        // Aggiunge i paragrafi del piè di pagina.
+        footerData.content.forEach(item => {
+            const pElement = document.createElement('p');
+            pElement.textContent = item.text; // Imposta il testo del paragrafo.
+            footerDiv.appendChild(pElement); // Aggiunge il paragrafo al piè di pagina.
+        });
+
+        footerContainer.appendChild(footerDiv); // Aggiunge il piè di pagina al contenitore.
+    }
+
+    // Immagini per lo slideshow.
+    const images = [
+        "https://www.raiscuola.rai.it/dl/img/2021/03/25/1616683561166_1582717587391_technology-1283624_1920.jpg",
+        "https://www.pcmod.it/wp-content/uploads/2023/06/Sicurezza-Informatica-per-le-Piccole-Imprese.webp",
+        "https://uicmarche.it/wp-content/uploads/2022/03/Computer-sito-1.jpg"
+    ];
+
+    let currentIndex = 0;
+
+    // Funzioni per navigare nello slideshow
+    function showImage(index) {
+        const slideshowImage = document.getElementById('slideshowImage');
+        slideshowImage.src = images[index];
+    }
+
+    function nextImage() {
+        currentIndex = (currentIndex + 1) % images.length; // Incrementa l'indice dell'immagine e fa il loop.
+        showImage(currentIndex);
+    }
+
+    function prevImage() {
+        currentIndex = (currentIndex - 1 + images.length) % images.length; // Decrementa l'indice e fa il loop.
+        showImage(currentIndex);
+    }
+</script>
+
+</body>
+</html>

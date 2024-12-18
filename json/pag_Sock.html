@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Impostazioni della codifica e della viewport per la compatibilità con dispositivi mobili -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Includo il foglio di stile di Bootstrap per stilizzare la pagina -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- Includo il foglio di stile personalizzato -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Titolo della pagina visibile nella scheda del browser -->
+    <title>Cosa sono le Socket?</title>
+</head>
+<body>
+
+<!-- Contenitore per l'intestazione della pagina, popolato tramite JavaScript -->
+<div id="header-container"></div>
+
+<!-- Contenitore per la barra di navigazione, popolato tramite JavaScript -->
+<nav id="navbar-container"></nav>
+
+<!-- Contenitore per il contenuto principale della pagina, popolato tramite JavaScript -->
+<div id="content-container"></div>
+
+<!-- Contenitore per il piè di pagina, popolato tramite JavaScript -->
+<footer id="footer-container"></footer>
+
+<script>
+    // Funzione per caricare il contenuto dal file JSON
+    fetch('PS.json')
+        .then(response => response.json()) // Converte la risposta in formato JSON
+        .then(data => {
+            // Chiamata delle funzioni per popolare le varie sezioni della pagina
+            renderHeader(data.html.body.header);
+            renderNavbar(data.html.body.nav);
+            renderContent(data.html.body.content);
+            renderFooter(data.html.body.footer);
+        })
+        .catch(error => console.error('Error loading JSON:', error)); // Gestione degli errori
+
+    // Funzione per generare l'intestazione della pagina
+    function renderHeader(headerData) {
+        const headerContainer = document.getElementById('header-container');
+        const headerDiv = document.createElement('div');
+        headerDiv.className = headerData.class; // Assegna la classe CSS
+
+        // Aggiunge ogni elemento dell'intestazione come specificato nel JSON
+        headerData.content.forEach(item => {
+            if (item.type === "h1") {
+                const h1Element = document.createElement('h1');
+                h1Element.textContent = item.text;
+                headerDiv.appendChild(h1Element);
+            }
+        });
+
+        headerContainer.appendChild(headerDiv); // Aggiunge l'intestazione alla pagina
+    }
+
+    // Funzione per generare la barra di navigazione
+    function renderNavbar(navData) {
+        const navbarContainer = document.getElementById('navbar-container');
+        const navElement = document.createElement('nav');
+        navElement.className = navData.class;
+
+        const ulElement = document.createElement('ul');
+        ulElement.className = navData.content.ul.class;
+        navData.content.ul.li.forEach(item => {
+            const liElement = document.createElement('li');
+            liElement.className = item.class;
+            const aElement = document.createElement('a');
+            aElement.className = item.a.class;
+            aElement.href = item.a.href;
+            aElement.textContent = item.a.text;
+            liElement.appendChild(aElement);
+            ulElement.appendChild(liElement);
+        });
+
+        navElement.appendChild(ulElement); // Aggiunge la lista alla barra di navigazione
+        navbarContainer.appendChild(navElement); // Aggiunge la barra di navigazione alla pagina
+    }
+
+    // Funzione per generare il contenuto principale della pagina
+    function renderContent(contentData) {
+        const contentContainer = document.getElementById('content-container');
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = contentData.section.class;
+
+        // Aggiunge ogni elemento del contenuto come specificato nel JSON
+        contentData.section.content.forEach(item => {
+            if (item.type === "p") {
+                const pElement = document.createElement('p');
+                pElement.textContent = item.text;
+                sectionDiv.appendChild(pElement);
+            } else if (item.type === "img") {
+                const imgElement = document.createElement('img');
+                imgElement.src = item.src;
+                imgElement.alt = item.alt;
+                imgElement.className = item.class;
+                sectionDiv.appendChild(imgElement);
+            }
+        });
+
+        contentContainer.appendChild(sectionDiv); // Aggiunge il contenuto alla pagina
+    }
+
+    // Funzione per generare il piè di pagina
+    function renderFooter(footerData) {
+        const footerContainer = document.getElementById('footer-container');
+        const footerDiv = document.createElement('footer');
+        footerDiv.className = footerData.class;
+
+        // Aggiunge ogni elemento del piè di pagina come specificato nel JSON
+        footerData.content.forEach(item => {
+            const pElement = document.createElement('p');
+            pElement.textContent = item.text;
+            footerDiv.appendChild(pElement);
+        });
+
+        footerContainer.appendChild(footerDiv); // Aggiunge il piè di pagina alla pagina
+    }
+</script>
+
+<!-- Includo il file JavaScript di Bootstrap per i componenti interattivi -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-cVKIPhG81rKrOSn0H4zYfTw+KkqLR9GPiEglsjRE3S6SpzOF24C1S+KCqs5Iw9Ci" crossorigin="anonymous"></script>
+</body>
+</html>

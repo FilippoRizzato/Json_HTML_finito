@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <!-- Definisce il set di caratteri e la configurazione per la visualizzazione su dispositivi mobili -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Link al foglio di stile personalizzato -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Includo il foglio di stile di Bootstrap per una rapida formattazione -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- Titolo della pagina (mostrato nella scheda del browser) -->
+    <title>Modello OSI</title>
+</head>
+<body>
+
+<!-- Sezione centrale della pagina con il titolo dell'intestazione -->
+<div class="text-center mb-4">
+    <h1 id="header-title"></h1> <!-- Titolo popolato tramite JavaScript -->
+</div>
+
+<!-- Barra di navigazione (con links dinamici popolati tramite JavaScript) -->
+<nav class="navbar navbar-expand-sm custom-navbar">
+    <div class="container-fluid">
+        <ul class="navbar-nav mx-auto" id="navbar-links"></ul> <!-- Links della navbar -->
+    </div>
+</nav>
+
+<!-- Contenitore per il contenuto principale della pagina, che verrà popolato dinamicamente -->
+<div class="container mt-4" id="content-container"></div>
+
+<!-- Piè di pagina con testo e autore, anche questi popolati tramite JavaScript -->
+<footer class="bg-dark text-white text-center py-4 mt-5">
+    <p id="footer-text"></p> <!-- Testo del piè di pagina -->
+    <p id="footer-author"></p> <!-- Autore del piè di pagina -->
+</footer>
+
+<script>
+    // Funzione per caricare il contenuto dal file JSON
+    fetch('OS.json')
+        .then(response => {
+            // Verifica che la risposta della rete sia corretta
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Converte la risposta in JSON
+        })
+        .then(data => {
+            // Imposta il titolo nell'intestazione
+            const headerTitle = document.getElementById('header-title');
+            if (headerTitle) {
+                headerTitle.textContent = data.header.title; // Imposta il titolo
+            }
+
+            // Costruisce i links per la navbar
+            const navbarLinks = document.getElementById('navbar-links');
+            if (navbarLinks) {
+                data.navbar.links.forEach(link => {
+                    const li = document.createElement('li');
+                    li.className = 'nav-item'; // Assegna la classe "nav-item" a ogni elemento della lista
+                    const a = document.createElement('a');
+                    a.className = 'nav-link'; // Assegna la classe "nav-link" ai link
+                    a.href = link.href; // Imposta il collegamento
+                    a.textContent = link.text; // Imposta il testo del link
+                    li.appendChild(a);
+                    navbarLinks.appendChild(li); // Aggiunge ogni link alla navbar
+                });
+            }
+
+            // Costruisce le sezioni del contenuto
+            const contentContainer = document.getElementById('content-container');
+            if (contentContainer) {
+                data.content.sections.forEach(section => {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.className = 'row mb-3'; // Classe per il layout della sezione
+                    const colDiv = document.createElement('div');
+                    colDiv.className = 'col-12'; // Classe per la colonna
+
+                    // Aggiunge il titolo della sezione
+                    const sectionTitle = document.createElement('h2');
+                    sectionTitle.textContent = section.title;
+                    colDiv.appendChild(sectionTitle);
+
+                    // Aggiunge i paragrafi
+                    section.paragraphs.forEach(paragraph => {
+                        const p = document.createElement('p');
+                        p.textContent = paragraph; // Testo del paragrafo
+                        colDiv.appendChild(p);
+                    });
+
+                    // Aggiunge una lista numerata, se presente
+                    if (section.list) {
+                        const ol = document.createElement('ol');
+                        section.list.forEach(item => {
+                            const li = document.createElement('li');
+                            li.innerHTML = item; // Elemento della lista
+                            ol.appendChild(li);
+                        });
+                        colDiv.appendChild(ol);
+                    }
+
+                    // Aggiunge un'immagine, se presente
+                    if (section.image) {
+                        const imgDiv = document.createElement('div');
+                        imgDiv.className = 'text-center'; // Centro l'immagine
+
+                        const img = document.createElement('img');
+                        img.src = section.image.src; // Fonte dell'immagine
+                        img.alt = section.image.alt; // Descrizione dell'immagine
+                        img.className = 'img-fluid shadow-sm'; // Classe per la formattazione
+
+                        // Gestione degli errori per l'immagine (in caso di errore, carica un'immagine di fallback)
+                        img.onerror = function() {
+                            img.src = 'fallback-image.png'; // Immagine di fallback
+                            img.alt = 'Immagine non disponibile'; // Messaggio di errore
+                            console.error('Errore nel caricamento dell\'immagine, usando l\'immagine di fallback');
+                        };
+
+                        imgDiv.appendChild(img); // Aggiunge l'immagine al div
+
+                        const caption = document.createElement('p');
+                        caption.className = 'mt-2'; // Classe per la didascalia
+                        caption.textContent = section.caption; // Didascalia dell'immagine
+                        imgDiv.appendChild(caption);
+
+                        colDiv.appendChild(imgDiv); // Aggiunge l'immagine e la didascalia alla sezione
+                    }
+
+                    sectionDiv.appendChild(colDiv); // Aggiunge la colonna alla sezione
+                    contentContainer.appendChild(sectionDiv); // Aggiunge la sezione al contenitore del contenuto
+                });
+            }
+
+            // Imposta il testo e l'autore nel piè di pagina
+            const footerText = document.getElementById('footer-text');
+            if (footerText) {
+                footerText.textContent = data.footer.text; // Imposta il testo del piè di pagina
+            }
+            const footerAuthor = document.getElementById('footer-author');
+            if (footerAuthor) {
+                footerAuthor.textContent = data.footer.author; // Imposta l'autore del piè di pagina
+            }
+        })
+        .catch(error => console.error('Error loading JSON:', error)); // Gestione degli errori nel caricamento del JSON
+</script>
+
+<!-- Includo il file JavaScript di Bootstrap per i componenti interattivi -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-cVKIPhG81rKrOSn0" crossorigin="anonymous"></script>
+</body>
+</html>
